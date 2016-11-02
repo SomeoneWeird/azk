@@ -10,7 +10,7 @@ var data_path = envs('AZK_DATA_PATH');
 var namespace = envs('AZK_NAMESPACE');
 
 // Use virtual machine or not?
-var default_vm  = os.platform() == "linux" ? false : true;
+var default_vm  = os.platform() == "linux" ? false : false;
 var requires_vm = envs('AZK_USE_VM', default_vm);
 
 // Data mount folder path
