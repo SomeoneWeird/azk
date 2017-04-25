@@ -34,10 +34,10 @@ export AZK_NPM_PATH=${AZK_NPM_PATH:-$AZK_ROOT_PATH/node_modules};     # package 
 # Nvm paths and configs
 node_version=`cat $AZK_ROOT_PATH/.nvmrc`
 export NVM_DIR=$AZK_LIB_PATH/nvm
-export AZK_NODE_PATH=${AZK_NODE_PATH:-$NVM_DIR/$node_version/bin}
+export AZK_NODE_PATH=${AZK_NODE_PATH:-$NVM_DIR/versions/$node_version/bin}
 
 # Node load paths
-export NODE_PATH=$NVM_DIR/$node_version/node_modules
+export NODE_PATH=$NVM_DIR/versions/$node_version/node_modules
 export NODE_PATH=$AZK_ROOT_PATH:$NODE_PATH
 export NODE_PATH=$AZK_NPM_PATH:$NODE_PATH
 export NODE_PATH=$AZK_LIB_PATH:$NODE_PATH

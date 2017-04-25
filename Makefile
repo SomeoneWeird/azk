@@ -21,13 +21,13 @@ all: bootstrap
 
 NVM_DIR := ${AZK_LIB_PATH}/nvm
 NVM_NODE_VERSION := $(shell cat ${AZK_ROOT_PATH}/.nvmrc)
-NODE = ${NVM_DIR}/${NVM_NODE_VERSION}/bin/node
+NODE = ${NVM_DIR}/versions/${NVM_NODE_VERSION}/bin/node
 VM_DISKS_DIR := ${AZK_LIB_PATH}/vm/${AZK_ISO_VERSION}
 
-# Locking npm and clingwrap version
+NPM_VERSION=4.6.1
+
+# Locking npm version
 NPM_VERSION_FILE := ${NVM_DIR}/npm_version
-CLINGWRAP_VERSION_FILE := ${NVM_DIR}/clingwrap_version
-NCU_VERSION_FILE := ${NVM_DIR}/ncu_version
 
 finished:
 	@echo "Finished!"
@@ -37,12 +37,6 @@ check_node_dependencies: ${NODE}
 	@if [ ! "$$(${AZK_BIN} nvm npm --version)" = "${NPM_VERSION}" ] ; then \
 		rm -f ${NPM_VERSION_FILE}; \
 	fi
-	@if [ ! "$$(${AZK_BIN} nvm clingwrap --version)" = "${CLINGWRAP_VERSION}" ] ; then \
-		rm -f ${CLINGWRAP_VERSION_FILE}; \
-	fi
-	@if [ ! "$$(${AZK_BIN} nvm ncu --version)" = "${NCU_VERSION}" ] ; then \
-		rm -f ${NCU_VERSION_FILE}; \
-	fi
 
 SRC_JS = $(shell cd ${AZK_ROOT_PATH} && find ./src -name '*.*' -print 2>/dev/null)
 
@@ -50,13 +44,13 @@ teste_envs:
 	@echo ${LIBNSS_RESOLVER_VERSION}
 	@echo ${AZK_ISO_VERSION}
 
-${AZK_LIB_PATH}/azk: $(SRC_JS) ${NPM_VERSION_FILE} ${CLINGWRAP_VERSION_FILE} ${NCU_VERSION_FILE} ${AZK_NPM_PATH}/.install
+${AZK_LIB_PATH}/azk: $(SRC_JS) ${NPM_VERSION_FILE} ${AZK_NPM_PATH}/.install
 	@echo "task: $@"
 	@export AZK_LIB_PATH=${AZK_LIB_PATH} && \
 		export AZK_NPM_PATH=${AZK_NPM_PATH} && \
 		${AZK_BIN} nvm gulp babel && touch ${AZK_LIB_PATH}/azk
 
-${AZK_NPM_PATH}/.install: npm-shrinkwrap.json package.json
+${AZK_NPM_PATH}/.install: package.json
 	@echo "task: $@"
 	@mkdir -p ${AZK_NPM_PATH}
 	@export AZK_LIB_PATH=${AZK_LIB_PATH} && \
@@ -70,16 +64,6 @@ ${NPM_VERSION_FILE}:
 	@touch package.json
 	@${AZK_BIN} nvm npm install npm@${NPM_VERSION} -g
 	@${AZK_BIN} nvm npm --version > ${NPM_VERSION_FILE}
-
-${CLINGWRAP_VERSION_FILE}:
-	@echo "task: install clingwrap ${CLINGWRAP_VERSION}"
-	@${AZK_BIN} nvm npm install clingwrap@${CLINGWRAP_VERSION} -g
-	@${AZK_BIN} nvm clingwrap --version > ${CLINGWRAP_VERSION_FILE}
-
-${NCU_VERSION_FILE}:
-	@echo "task: install npm-check-updates ${NCU_VERSION}"
-	@${AZK_BIN} nvm npm install npm-check-updates@${NCU_VERSION} -g
-	@${AZK_BIN} nvm ncu --version > ${NCU_VERSION_FILE}
 
 ${NODE}:
 	@echo "task: $@: ${NVM_NODE_VERSION}"
@@ -170,16 +154,9 @@ check_version:
 		exit 1; \
 	fi
 
-${PATH_NODE_MODULES}: ${PACKAGE_NPM_VERSION_FILE} ${PATH_USR_LIB_AZK}/npm-shrinkwrap.json
+${PATH_NODE_MODULES}: ${PACKAGE_NPM_VERSION_FILE}
 	@echo "task: $@"
 	@cd ${PATH_USR_LIB_AZK} && ${AZK_BIN} nvm npm install --production
-
-${PATH_USR_LIB_AZK}/npm-shrinkwrap.json: ${PATH_USR_LIB_AZK}/package.json
-	@echo "task: $@"
-	@test -e ${PATH_NODE_MODULES} && rm -rf ${PATH_NODE_MODULES} || true
-	@ln -s ${AZK_NPM_PATH} ${PATH_NODE_MODULES}
-	@cd ${PATH_USR_LIB_AZK} && ${AZK_BIN} nvm npm shrinkwrap
-	@rm ${PATH_NODE_MODULES}
 
 ${PACKAGE_NPM_VERSION_FILE}:
 	@echo "task: $@"

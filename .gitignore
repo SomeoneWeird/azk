@@ -9,3 +9,4 @@
 /build
 npm-debug.log
 .package-envs
+.DS_Store
